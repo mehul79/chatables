@@ -60,7 +60,6 @@ export default function HomePage() {
 
   const handleEmojiSelect = (emoji: { native?: string }) => {
     setMessage((prev) => prev + (emoji.native || ""));
-    inputRef.current?.focus();
   };
 
   return (
@@ -162,7 +161,6 @@ export default function HomePage() {
                   placeholder="Type a message"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onFocus={() => setShowEmoji(false)}
                 />
                 {/* Send Button */}
                 <button className="btn btn-primary btn-circle" type="button">
