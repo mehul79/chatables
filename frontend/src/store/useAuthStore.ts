@@ -5,7 +5,7 @@ import axios from "axios";
 
 
 type AuthStore = {
-    authUser: object | null,
+    authUser: authUser | null,
     isSigningUp: boolean,
     isLogginin: boolean,
     isUpdatingProfile: boolean,
@@ -18,6 +18,13 @@ type AuthStore = {
     updateProfile: (FormData: any, userId: any)=> Promise<void>
 }
 
+type authUser = {
+    id: string,
+    name?: string,
+    email?: string,
+    profilePic?: string,
+    createdAt?: string,
+}
 
 export const useAuthStore = create<AuthStore>((set) => ({
     authUser: null,

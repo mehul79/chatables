@@ -1,0 +1,6 @@
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: var(--b1); /* or Tailwind's bg-base-100 */
+}
