@@ -5,7 +5,7 @@ const MessageSkeleton = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Top navbar skeleton */}
-      <div className="h-20 px-8 flex items-center gap-4 border-b border-base-300 bg-base-100/80 rounded-tr-2xl">
+      <div className="h-20 px-8 flex items-center gap-4 border-b border-base-300 bg-base-100/80 rounded-tr-2xl relative z-10">
         <div className="skeleton w-12 h-12 rounded-full" />
         <div className="flex flex-col gap-2 flex-1">
           <div className="skeleton h-4 w-32" />
@@ -13,7 +13,7 @@ const MessageSkeleton = () => {
         </div>
       </div>
       {/* Messages skeleton */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-base-100">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-base-100 relative z-10">
         {skeletonMessages.map((_, idx) => (
           <div
             key={idx}

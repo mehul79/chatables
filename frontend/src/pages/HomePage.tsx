@@ -4,6 +4,7 @@ import SidebarSkeleton from "../components/Skeletons/SidebarSkeleton";
 import MessageSkeleton from "../components/Skeletons/MessageSkeleton";
 import { useEffect, useState, useRef } from "react";
 import Picker from "@emoji-mart/react";
+import { FlickeringGrid } from "../components/FlickeringGrid";
 
 const dummyUsers: ChatUser[] = [
   {
@@ -39,6 +40,8 @@ const dummyUsers: ChatUser[] = [
     online: false,
   },
 ];
+
+
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -124,7 +127,8 @@ export default function HomePage() {
                   <MessageSkeleton />
                 ) : (
                   <div className="h-full flex items-center justify-center text-base-content/60">
-                    Select a chat to start messaging.
+                    {/* Select a chat to start messaging. */}
+                    <FlickeringGrid />
                   </div>
                 )}
               </div>
