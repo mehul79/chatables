@@ -18,7 +18,7 @@ const MessageSkeleton = () => {
       <div className="relative flex-1 overflow-y-auto p-4 space-y-4 bg-base-100">
         {/* FlickeringGrid as background */}
         <div className="absolute inset-0 z-0 pointer-events-none w-full h-full overflow-hidden">
-          <FlickeringGrid width={1000} maxOpacity={0.05} />
+          <FlickeringGrid width={1000} maxOpacity={0.09} />
         </div>
 
         {/* Skeleton Messages (foreground) */}

@@ -5,6 +5,7 @@ import MessageSkeleton from "../components/Skeletons/MessageSkeleton";
 import { useEffect, useState, useRef } from "react";
 import Picker from "@emoji-mart/react";
 import { FlickeringGrid } from "../components/FlickeringGrid";
+import ChatBox from "../components/ChatBox";
 
 const dummyUsers: ChatUser[] = [
   {
@@ -40,8 +41,6 @@ const dummyUsers: ChatUser[] = [
     online: false,
   },
 ];
-
-
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -122,18 +121,112 @@ export default function HomePage() {
                 </div>
               )}
               {/* Chat Messages or Skeleton */}
-              <div className="flex-1">
+              <div className="flex-1 overflow-hidden">
                 {loading ? (
                   <MessageSkeleton />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-base-content/60 overflow-x-hidden">
-                    {/* Select a chat to start messaging. */}
-                    <FlickeringGrid width={1000} maxOpacity={0.05}/>
+                  <div
+                    className="flex flex-col gap-1 overflow-x-hidden relative flex-1 overflow-y-auto p-5  bg-base-100"
+                    style={{ scrollbarWidth: "thin" }}
+                  >
+                  <div className="absolute inset-0 z-0 w-full h-screen overflow-hidden">
+                      <FlickeringGrid width={1000} maxOpacity={0.07} />
+                  </div>
+                    {/* Example chat messages (duplicated) */}
+                    {(() => {
+                      // Example messages array
+                      const messages = [
+                        {
+                          message: "Hey! How are you?",
+                          time: "10:45 AM",
+                          sent: false,
+                        },
+                        {
+                          message: "I'm good, thanks! How about you?",
+                          time: "10:46 AM",
+                          sent: true,
+                        },
+                        {
+                          message: "Doing well! Are we still on for tonight?",
+                          time: "10:47 AM",
+                          sent: false,
+                        },
+                        {
+                          message: "Absolutely, see you at 8!",
+                          time: "10:48 AM",
+                          sent: true,
+                        },
+                        {
+                          message: "Great, see you!",
+                          time: "10:49 AM",
+                          sent: false,
+                        },
+                        {
+                          message: "Looking forward to it!",
+                          time: "10:50 AM",
+                          sent: true,
+                        },
+                        {
+                          message: "Same here!",
+                          time: "10:51 AM",
+                          sent: false,
+                        },
+                        {
+                          message: "See you soon!",
+                          time: "10:52 AM",
+                          sent: true,
+                        },
+                        {
+                          message: "See you soon!",
+                          time: "10:52 AM",
+                          sent: true,
+                        },
+                        {
+                          message: "Great, see you!",
+                          time: "10:49 AM",
+                          sent: false,
+                        },
+                        {
+                          message: "Looking forward to it!",
+                          time: "10:50 AM",
+                          sent: true,
+                        },
+                        {
+                          message: "Same here!",
+                          time: "10:51 AM",
+                          sent: false,
+                        },
+                        {
+                          message: "See you soon!",
+                          time: "10:52 AM",
+                          sent: true,
+                        },
+                        {
+                          message: "See you soon!",
+                          time: "10:52 AM",
+                          sent: true,
+                        },
+                      ];
+                      return messages.map((msg, idx) => {
+                        const isLastInGroup =
+                          idx === messages.length - 1 ||
+                          messages[idx + 1].sent !== msg.sent;
+                        return (
+                          <ChatBox
+                            key={idx}
+                            message={msg.message}
+                            time={msg.time}
+                            sent={msg.sent}
+                            showTime={isLastInGroup}
+                          />
+                        );
+                      });
+                    })()}
                   </div>
                 )}
               </div>
               {/* Chat Input Box */}
-              <div className="px-4 py-3 bg-base-200 border-t border-base-300 flex items-center gap-2 relative ">
+              <div className="px-4 py-3 bg-base-200 border-t border-base-300 flex items-center gap-2 sticky ">
                 {/* Emoji Picker Button */}
                 <button
                   className="btn btn-ghost btn-circle"
