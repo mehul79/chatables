@@ -126,9 +126,9 @@ export default function HomePage() {
                 {loading ? (
                   <MessageSkeleton />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-base-content/60">
+                  <div className="h-full flex items-center justify-center text-base-content/60 overflow-x-hidden">
                     {/* Select a chat to start messaging. */}
-                    <FlickeringGrid />
+                    <FlickeringGrid width={1000} maxOpacity={0.05}/>
                   </div>
                 )}
               </div>

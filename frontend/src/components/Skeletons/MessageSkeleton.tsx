@@ -1,5 +1,6 @@
+import { FlickeringGrid } from "../FlickeringGrid";
+
 const MessageSkeleton = () => {
-  // Create an array of 6 items for skeleton messages
   const skeletonMessages = Array(4).fill(null);
 
   return (
@@ -12,21 +13,30 @@ const MessageSkeleton = () => {
           <div className="skeleton h-3 w-16" />
         </div>
       </div>
-      {/* Messages skeleton */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-base-100 relative z-10">
-        {skeletonMessages.map((_, idx) => (
-          <div
-            key={idx}
-            className={`flex ${
-              idx % 2 === 0 ? "justify-start" : "justify-end"
-            }`}
-          >
-            <div className="max-w-[70%]">
-              <div className="skeleton h-12 w-full rounded-xl mb-2" />
-              <div className="skeleton h-3 w-16 rounded" />
+
+      {/* Chat area with flickering background */}
+      <div className="relative flex-1 overflow-y-auto p-4 space-y-4 bg-base-100">
+        {/* FlickeringGrid as background */}
+        <div className="absolute inset-0 z-0 pointer-events-none w-full h-full overflow-hidden">
+          <FlickeringGrid width={1000} maxOpacity={0.05} />
+        </div>
+
+        {/* Skeleton Messages (foreground) */}
+        <div className="relative z-10">
+          {skeletonMessages.map((_, idx) => (
+            <div
+              key={idx}
+              className={`flex ${
+                idx % 2 === 0 ? "justify-start" : "justify-end"
+              }`}
+            >
+              <div className="max-w-[70%]">
+                <div className="skeleton h-12 w-40 rounded-xl mb-2" />
+                <div className="skeleton h-3 w-20 rounded" />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
