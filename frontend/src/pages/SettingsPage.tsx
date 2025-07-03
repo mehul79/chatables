@@ -4,7 +4,11 @@ import { Send } from "lucide-react";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
-  { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
+  {
+    id: 2,
+    content: "I'm doing great! Just working on some new features.",
+    isSent: true,
+  },
 ];
 
 const SettingsPage = () => {
@@ -15,7 +19,9 @@ const SettingsPage = () => {
       <section className="space-y-6">
         <header>
           <h2 className="text-lg font-semibold">Theme</h2>
-          <p className="text-sm text-base-content/70">Choose a theme for your chat interface</p>
+          <p className="text-sm text-base-content/70">
+            Choose a theme for your chat interface
+          </p>
         </header>
 
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
@@ -27,7 +33,10 @@ const SettingsPage = () => {
                 theme === t ? "bg-base-200" : "hover:bg-base-200/50"
               }`}
             >
-              <div className="relative h-8 w-full rounded-md overflow-hidden" data-theme={t}>
+              <div
+                className="relative h-8 w-full rounded-md overflow-hidden"
+                data-theme={t}
+              >
                 <div className="absolute inset-0 grid grid-cols-4 gap-px p-1">
                   <div className="rounded bg-primary"></div>
                   <div className="rounded bg-secondary"></div>
@@ -62,7 +71,9 @@ const SettingsPage = () => {
               {PREVIEW_MESSAGES.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.isSent ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    msg.isSent ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
                     className={`max-w-[80%] p-3 rounded-xl shadow-sm ${
@@ -74,7 +85,9 @@ const SettingsPage = () => {
                     <p className="text-sm">{msg.content}</p>
                     <p
                       className={`text-[10px] mt-1.5 ${
-                        msg.isSent ? "text-primary-content/70" : "text-base-content/70"
+                        msg.isSent
+                          ? "text-primary-content/70"
+                          : "text-base-content/70"
                       }`}
                     >
                       12:00 PM
