@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Camera, Edit, Mail, User } from "lucide-react";
+import { Camera, Edit, Mail, User, Send, Loader2 } from "lucide-react";
 
 const ProfilePage = () => {
-  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+  const { authUser, isUpdatingProfile, updateProfile, updateFullName, isUpdatingFullName } = useAuthStore();
   const [editing, setEditing] = useState(false);
   const [selectedImg, setSelectedImg] = useState(authUser?.profilePic || "");
+  const [fullNameInput, setFullNameInput] = useState(authUser?.name || "");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -13,8 +14,8 @@ const ProfilePage = () => {
       return null;
     }
 
+    //this section updates the frontend with whatever image has been uploaded by the user 
     const reader = new FileReader();
-
     reader.readAsDataURL(file);
     reader.onload = async () => {
       const base64Image = reader.result;
@@ -22,14 +23,23 @@ const ProfilePage = () => {
     };
 
     const formData = new FormData();
-
-    formData.append("profilePic", file);
     const userId = authUser?.id;
+    formData.append("profilePic", file);
     await updateProfile(formData, userId);
   };
 
-  const updateFullName = () => {
+  const handleEditToggle = () => {
+    if (editing) {
+      setFullNameInput(authUser?.name || "");
+    }
     setEditing((prev) => !prev);
+  };
+
+  const handleFullNameUpdate = async () => {
+    if (fullNameInput.trim() && fullNameInput !== authUser?.name) {
+      await updateFullName(fullNameInput.trim());
+      setEditing(false);
+    }
   };
 
   return (
@@ -89,13 +99,41 @@ const ProfilePage = () => {
                 </div>
                 <div className="px-4 py-2.5 bg-base-200 rounded-lg border flex justify-between items-center w-full">
                   {editing ? (
-                    <div>hi</div>
+                    <>
+                      <input
+                        type="text"
+                        value={fullNameInput}
+                        onChange={(e) => setFullNameInput(e.target.value)}
+                        className="flex-1 bg-transparent outline-none text-base-content"
+                        placeholder="Enter your full name"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleFullNameUpdate();
+                          }
+                          if (e.key === 'Escape') {
+                            handleEditToggle();
+                          }
+                        }}
+                      />
+                      <button
+                        className="cursor-pointer hover:text-primary transition-colors"
+                        onClick={handleFullNameUpdate}
+                        disabled={isUpdatingFullName || !fullNameInput.trim()}
+                      >
+                        {isUpdatingFullName ? (
+                          <Loader2 size={20} className="animate-spin" />
+                        ) : (
+                          <Send size={20} />
+                        )}
+                      </button>
+                    </>
                   ) : (
                     <>
                       <span>{authUser?.name}</span>
                       <button
-                        className="cursor-pointer"
-                        onClick={updateFullName}
+                        className="cursor-pointer hover:text-primary transition-colors"
+                        onClick={handleEditToggle}
                       >
                         <Edit size={20} />
                       </button>
@@ -119,7 +157,7 @@ const ProfilePage = () => {
           <div className="mt-0 bg-base-300 rounded-xl px-6">
             <h2 className="text-lg font-medium mb-4">Account Information</h2>
             <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between py-2 border-b border-zinc-700">
+              <div className="flex items-center justify-between py-2">
                 <span>Member Since</span>
                 <span>
                   {authUser?.createdAt &&

@@ -9,13 +9,15 @@ type AuthStore = {
     isSigningUp: boolean,
     isLogginin: boolean,
     isUpdatingProfile: boolean,
+    isUpdatingFullName: boolean,
     isCheckingAuth: boolean,
     checkAuth: () => Promise<void>,
     signup: (formData: any) => Promise<void>
     logout: ()=> Promise<void>,
     isLoggingIn: boolean,
     login: (formData: any)=> Promise<void>,
-    updateProfile: (FormData: any, userId: any)=> Promise<void>
+    updateProfile: (FormData: any, userId: any)=> Promise<void>,
+    updateFullName: (fullName: string) => Promise<void>
 }
 
 type authUser = {
@@ -32,6 +34,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     isLoggingIn: false,
     isLogginin: false,
     isUpdatingProfile: false,
+    isUpdatingFullName: false,
     isCheckingAuth: true,
 
 
@@ -119,6 +122,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
           toast.error(error.response.data.message);
         } finally {
           set({ isUpdatingProfile: false });
+        }
+      },
+
+      updateFullName: async (fullName: string) => {
+        set({ isUpdatingFullName: true });
+        try {
+          const res = await axiosInstance.put("/auth/update-fullname", 
+            { fullName },
+            { withCredentials: true }
+          );
+          
+          set({ authUser: res.data.user });
+          toast.success("Full name updated successfully");
+        } catch (error: any) {
+          console.log("error in update full name:", error);
+          toast.error(error.response?.data?.message || "Failed to update full name");
+        } finally {
+          set({ isUpdatingFullName: false });
         }
       },
 }));
