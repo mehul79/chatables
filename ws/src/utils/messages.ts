@@ -1,1 +1,2 @@
-export const message = 'message';
+export const receiving = 'receiving';
+export const sending = 'sending';
