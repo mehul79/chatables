@@ -7,11 +7,15 @@ const webSocketServer = new ws.Server({ port: Number(port) });
 
 webSocketServer.on('connection', (socket) => {
   console.log('New client connected!');
-
   // Handle incoming messages
   socket.on('message', (message) => {
     const data = message.toString();
     console.log('Received:', data);
+    webSocketServer.clients.forEach((client)=>{
+      if(client != socket){
+        client.send(data);  
+      }
+    })
   });
 
   // Handle client disconnection
