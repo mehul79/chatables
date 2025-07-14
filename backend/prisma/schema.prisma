@@ -34,7 +34,6 @@ model Message {
   image       String?
 
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
   sender      User     @relation("SenderRelation", fields: [senderId], references: [id])
   receiver    User     @relation("ReceiverRelation", fields: [receiverId], references: [id])
