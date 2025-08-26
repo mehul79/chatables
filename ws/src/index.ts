@@ -2,8 +2,6 @@ import ws from "ws"
 import dotenv from "dotenv"
 dotenv.config()
 const port = process.env.PORT || 8080;
-import { messages } from "./messageClass";
-import { receiving, sending } from "./utils/messages";
 
 const webSocketServer = new ws.Server({ port: Number(port) });
 

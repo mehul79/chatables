@@ -4,24 +4,24 @@ export interface ChatUser {
   id: string;
   name: string;
   profilePic: string;
-  lastMessage: string;
-  lastMessageSent: boolean; // true if sent by our user, false if received
-  online: boolean,
 }
 
 interface ChatUserListProps {
   users: ChatUser[];
+  selectedUser?: ChatUser | null;
+  onUserSelect: (user: ChatUser) => void;
 }
 
-const ChatUserList: React.FC<ChatUserListProps> = ({ users }) => {
+const ChatUserList: React.FC<ChatUserListProps> = ({ users, selectedUser, onUserSelect }) => {
   return (
     <div className="w-full">
       {users.map((user, idx) => (
         <React.Fragment key={user.id}>
           <div
             className={`flex items-center gap-3 px-4 py-3 transition-colors cursor-pointer hover:bg-base-200 ${
-              user.lastMessageSent ? "bg-base-100" : "bg-base-300/40"
+              selectedUser?.id === user.id ? "bg-base-200" : ""
             }`}
+            onClick={() => onUserSelect(user)}
           >
             <img
               src={user.profilePic}
@@ -31,15 +31,6 @@ const ChatUserList: React.FC<ChatUserListProps> = ({ users }) => {
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-base-content truncate">
                 {user.name}
-              </div>
-              <div
-                className={`text-sm truncate ${
-                  user.lastMessageSent
-                    ? "text-base-content/70"
-                    : "text-base-content/90 font-medium"
-                }`}
-              >
-                {user.lastMessage}
               </div>
             </div>
           </div>

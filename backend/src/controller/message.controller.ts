@@ -3,53 +3,36 @@ import prisma from '../db/db';
 import cloudinary from '../utils/cloudinary';
 
 
+const getUsersForSidebar = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user.id;
+    const otherUsers = await prisma.user.findMany({
+      where: {
+        NOT: { id: userId }
+      },
+      select: {
+        id: true,
+        name: true,
+        profilePic: true
+      }
+    });
 
-const getUsersForSidebar = async (req: Request, res: Response): Promise <void> => {
-    try{
-        const userId = req.user.id;
-        const otherUsers = [];
-        otherUsers.push(await prisma.user.findMany({
-            where: {
-                NOT: {
-                    id: userId
-                }
-            },
-            select: {
-                name: true,
-                email: true
-            }
-        }))
-
-        if(!otherUsers[0]){
-            res.status(404).json({
-                message: "No users found"
-            })
-            return;
-        }
-       
-        res.status(200).json({
-            users: otherUsers
-        })
+    res.status(200).json({ users: otherUsers });
+  } catch (e: any) {
+    console.log("error from message route 1:", e.message);
+    res.status(500).json({ message: e.message });
+  }
+};
 
 
-    }catch(e: any){
-        console.log("error from message route: ", e.message);
-        res.status(500).json({
-            message: e.message
-        })
-        
-    }
-}
-
-
-const getMessages = async (req: Request, res: Response): Promise <void> => {
-    try{
+const getMessages = async (req: Request, res: Response): Promise<void> => {
+    try {
         const params = req.params;
         const userToChatId = params.id;
 
         const myId = req.user.id;
-        const ReceviedMessages = await prisma.message.findMany({
-            where:{
+        const receivedMessages = await prisma.message.findMany({
+            where: {
                 OR: [
                     {
                         senderId: myId,
@@ -60,21 +43,17 @@ const getMessages = async (req: Request, res: Response): Promise <void> => {
                         receiverId: myId
                     }
                 ]
+            },
+            orderBy: {
+                createdAt: 'asc'
             }
         })
 
-        if(ReceviedMessages.length === 0){
-            res.status(404).json({
-                message: "No messages found"
-            })
-            return;
-        }
-
         res.status(200).json({
-            messages: ReceviedMessages
+            messages: receivedMessages
         })
-    }catch(e: any){
-        console.log("error from message route: ", e.message);
+    } catch (e: any) {
+        console.log("error from message route 2: ", e.message);
         res.status(500).json({
             message: e.message
         })
@@ -83,21 +62,21 @@ const getMessages = async (req: Request, res: Response): Promise <void> => {
 
 
 
-const sendMessage = async (req: Request, res: Response): Promise <void> => {
-    try{
+const sendMessage = async (req: Request, res: Response): Promise<void> => {
+    try {
         const params = req.params;
-        const {text, image} = req.body;
+        const { text, image } = req.body;
         const userToChatId = params.id;
         const myId = req.user.id;
 
         let imageUrl = "";
-        if(image){
+        if (image) {
             const uploadRes = await cloudinary.uploader.upload(image);
             imageUrl = uploadRes.secure_url;
         }
 
-        const message  = await prisma.message.create({
-            data:{
+        const message = await prisma.message.create({
+            data: {
                 senderId: myId,
                 receiverId: userToChatId,
                 text: text,
@@ -112,8 +91,8 @@ const sendMessage = async (req: Request, res: Response): Promise <void> => {
         })
 
 
-    }catch(e: any){
-        console.log("error from message route: ", e.message);
+    } catch (e: any) {
+        console.log("error from message route 3: ", e.message);
         res.status(500).json({
             message: e.message
         })

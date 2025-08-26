@@ -18,5 +18,4 @@ export class messages {
     this.text = text;
     this.image = image || null;
   }
-
 }

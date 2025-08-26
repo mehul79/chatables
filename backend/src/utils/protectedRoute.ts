@@ -46,15 +46,22 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
       }
 
       req.user = user; // Attach the user to the request object for further use in the route handler
-  
-      res.status(200).json({
-        message: "Protected route accessed",
-        user: user
-      });
-      next();
-  
+      console.log(`user ${user.name} accessed protected route`);
+      next(); // Proceed to the next middleware or route handler
     } catch (error: any) {
       console.log("Error in protectRoute middleware: ", error.message);
       res.status(500).json({ message: "Internal server error" });
     }
   };
+
+
+  export const checkAuth = async(req: Request, res: Response) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+  res.status(200).json({
+    message: "Protected route accessed",
+    user: req.user,
+  });
+};
