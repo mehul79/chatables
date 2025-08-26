@@ -8,6 +8,7 @@ import ChatBox from "../components/ChatBox";
 import { useChatStore } from "../store/useChatStore";
 import NoChatSelected from "../components/NoChatSelected";
 import { useAuthStore } from "../store/useAuthStore";
+import { useSocket } from "../hooks/useSockets";
 
 export default function HomePage() {
   const [showEmoji, setShowEmoji] = useState(false);
@@ -27,6 +28,11 @@ export default function HomePage() {
   
   const { authUser } = useAuthStore();
 
+  const socket = useSocket();
+  useEffect(()=>{
+    console.log("hehe", socket);
+  }, [])
+
   useEffect(() => {
     console.log("Calling getUsers...");
     getUsers();
@@ -45,6 +51,11 @@ export default function HomePage() {
   const handleUserSelect = (user: ChatUser) => {
     setSelectedUser(user);
   };
+
+  const onClickSend = ()=>{
+
+  }
+  
 
   return (
     <div className="h-screen overflow-hidden ">
@@ -119,7 +130,7 @@ export default function HomePage() {
                   <div className="overflow-x-hidden flex-1 overflow-y-auto bg-base-100 h-full relative">
                       {/* Messages */}
                       <div className="h-full">
-                      <div className="relative z-10">
+                      <div className="relative z-10 p-3">
                         {messages.length > 0 ? (
                           messages.map((msg, idx) => {
                             const isLastInGroup =
@@ -178,10 +189,10 @@ export default function HomePage() {
                     className="input input-bordered flex-1 bg-base-50 focus:bg-base-50 border-none outline-none shadow-none rounded-lg"
                     placeholder="Type a message"
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) => setMessage(e.target.value)}                    
                   />
                   {/* Send Button */}
-                  <button className="btn btn-primary btn-circle" type="button">
+                  <button className="btn btn-primary btn-circle" type="button" onClick={onClickSend}>
                     <Send className="w-5 h-5" />
                   </button>
                 </div>
