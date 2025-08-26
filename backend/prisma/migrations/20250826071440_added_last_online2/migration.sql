@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "lastActive" DROP NOT NULL,
+ALTER COLUMN "lastActive" DROP DEFAULT;
