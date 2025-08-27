@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, login, logout, updateProfile } from "../controller/auth.controller";
+import { signup, login, logout, updateProfile, updateFullname } from "../controller/auth.controller";
 import { protectRoute, checkAuth } from "../utils/protectedRoute";
 import multer from "multer";
 const router = express.Router();
@@ -13,6 +13,7 @@ router.post("/login", login)
 router.post("/logout", logout)
 router.get("/check", protectRoute, checkAuth);
 router.post("/update-profile", upload.single("profilePic"), updateProfile);
+router.put("/update-fullname", protectRoute, updateFullname )
 
 
 export { router as authRouter };

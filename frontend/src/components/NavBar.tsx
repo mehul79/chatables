@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 // TimeDisplay component for IST
 const TimeDisplay = () => {
   const [time, setTime] = useState("");
+  
 
   useEffect(() => {
     const updateTime = () => {
@@ -33,7 +34,6 @@ const TimeDisplay = () => {
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
-
   return (
     <header
       className="border-b border-base-300  w-full top-0 z-40 
@@ -53,6 +53,7 @@ const Navbar = () => {
             </Link>
           </div>
 
+          user: {authUser?.name}
           <div className="flex items-center gap-4">
             <TimeDisplay />
             <div className="flex items-center gap-2">

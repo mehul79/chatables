@@ -59,8 +59,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
         set({isSigningUp: true})
         try{
             const res = await axiosInstance.post("/auth/signup", formData)
-            set({authUser: res.data})
-            console.log(res);
+            set({ authUser: res.data.user });
+            console.log(res.data);
             toast.success(res.data.message)
         }catch(e: unknown){
             if (axios.isAxiosError(e)) {
@@ -94,8 +94,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
         set({ isLoggingIn: true });
         try {
           const res = await axiosInstance.post("/auth/login", data);
-          set({ authUser: res.data });
+          set({ authUser: res.data.user });
           toast.success("Logged in successfully"); 
+          console.log("bitch: ", res.data);
         } catch (error: any) {
           toast.error(error.response.data.message);
         } finally {

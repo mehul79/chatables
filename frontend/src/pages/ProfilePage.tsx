@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Camera, Edit, Mail, User, Send, Loader2 } from "lucide-react";
 
@@ -7,6 +7,10 @@ const ProfilePage = () => {
   const [editing, setEditing] = useState(false);
   const [selectedImg, setSelectedImg] = useState(authUser?.profilePic || "");
   const [fullNameInput, setFullNameInput] = useState(authUser?.name || "");
+
+  useEffect(()=>{
+    authUser
+  }, [authUser])
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

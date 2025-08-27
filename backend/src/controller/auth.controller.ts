@@ -109,7 +109,8 @@ const login = async (req: Request, res: Response): Promise<void> => {
       name: user.name,
       email: user.email,
       createdAt: user.createdAt.toLocaleDateString(),
-      updatedAt: user.updatedAt.toLocaleString()
+      updatedAt: user.updatedAt.toLocaleString(),
+      profilePic: user.profilePic
       },
     });
   } catch (e: any) {
@@ -175,10 +176,38 @@ const updateProfile = async (req: Request, res: Response) => {
   }
 };
 
+const updateFullname = async(req:Request, res:Response)=>{
+  try{
+    const user = req.user;
+    const {fullname} = req.body.fullName
+    if(!user){
+      res.send("No user found from update full name");
+      return;
+    }
+
+    const stringy = typeof req.body.fullName === "string" ? req.body.fullName.trim() : "";
+    const responce = await prisma.user.update({
+      where:{
+        id: user.id
+      },
+      data:{
+        name: stringy
+      }
+    })
+    res.status(200).json({
+      user: user,
+      success: true,
+    })
+  }catch(e){
+    console.log("error from update full name", e);
+    return;
+  }
+}
 
 
 
 
 
 
-export {signup, login, logout,  updateProfile}
+
+export {signup, login, logout,  updateProfile, updateFullname}

@@ -16,7 +16,6 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
   
     try {
       const token = req.cookies.token; // Safely access cookies
-      
       if (!token) {
         res.status(401).json({ message: "hehe: Unauthorized - No Token Provided" });
         return;
@@ -45,9 +44,9 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
         return;
       }
 
-      req.user = user; // Attach the user to the request object for further use in the route handler
-      console.log(`user ${user.name} accessed protected route`);
-      next(); // Proceed to the next middleware or route handler
+      req.user = user; 
+      console.log(`haha user ${user.name} accessed protected route`);
+      next(); 
     } catch (error: any) {
       console.log("Error in protectRoute middleware: ", error.message);
       res.status(500).json({ message: "Internal server error" });
