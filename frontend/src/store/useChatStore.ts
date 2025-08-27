@@ -3,18 +3,18 @@ import { toast } from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 
 export interface ChatUser {
-  id: string;
-  name: string;
-  profilePic: string;
+    id: string;
+    name: string;
+    profilePic: string;
 }
 
 export interface Message {
-  id: string;
-  text: string;
-  senderId: string;
-  receiverId: string;
-  createdAt: string;
-  image?: string;
+    id: string;
+    text: string;
+    senderId: string;
+    receiverId: string;
+    createdAt: string;
+    image?: string;
 }
 
 type ChatStoreState = {
@@ -23,6 +23,7 @@ type ChatStoreState = {
     selectedUser: ChatUser | null;
     isUsersLoading: boolean;
     isMessagesLoading: boolean;
+    addMessage: (message: Message) => void;
     getUsers: () => Promise<void>;
     setSelectedUser: (user: ChatUser | null) => void;
     getMessages: (userId: string) => Promise<void>;
@@ -35,6 +36,10 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     isUsersLoading: false,
     isMessagesLoading: false,
 
+    addMessage: (message: Message) => {
+        set((state) => ({ messages: [...state.messages, message] }));
+    },
+
     getUsers: async () => {
         set({ isUsersLoading: true });
         try {
@@ -45,24 +50,26 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
             console.log("Error from FE useChatStore ", e);
             toast.error("Unable to load the users");
         } finally {
-            setTimeout(()=>{
-                set({ isUsersLoading: false });
-            }, 2000)
+            // setTimeout(() => {
+            //     set({ isUsersLoading: false });
+            // }, 2000)
+            set({isUsersLoading: false})
         }
     },
 
     setSelectedUser: (user: ChatUser | null) => {
-        set({ selectedUser: user });
-        if (user) {
-            get().getMessages(user.id);
-        } else {
-            set({ messages: [] });
-        }
+            set({ selectedUser: user });
+            if (user) {
+                get().getMessages(user.id);
+            } else {
+                set({ messages: [] });
+            }
     },
 
     getMessages: async (userId: string) => {
         set({ isMessagesLoading: true });
         try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
             const res = await axiosInstance.get(`/messages/${userId}`);
             console.log("Messages Response:", res.data);
             set({ messages: res.data.messages || [] });

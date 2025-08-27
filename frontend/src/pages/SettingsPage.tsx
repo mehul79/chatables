@@ -15,7 +15,7 @@ const SettingsPage = () => {
   const { theme, setTheme } = useTheameStore();
 
   return (
-    <div className="min-h-screen px-4 pt-20 max-w-5xl mx-auto bg-base-100 text-base-content">
+    <div className="min-h-screen px-4 py-23 max-w-5xl mx-auto bg-base-100 overflow-hidden ">
       <section className="space-y-6">
         <header>
           <h2 className="text-lg font-semibold">Theme</h2>
@@ -52,7 +52,7 @@ const SettingsPage = () => {
         </div>
 
         {/* Preview Section */}
-        <div className="space-y-3">
+        <div className="space-y-3 ">
           <h3 className="text-lg font-semibold">Preview</h3>
           <div className="rounded-xl border border-base-300 shadow-lg overflow-hidden">
             {/* Header */}

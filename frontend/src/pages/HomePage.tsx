@@ -9,29 +9,94 @@ import { useChatStore } from "../store/useChatStore";
 import NoChatSelected from "../components/NoChatSelected";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSocket } from "../hooks/useSockets";
+import { MESSAGE_TYPES } from "../lib/types";
 
 export default function HomePage() {
   const [showEmoji, setShowEmoji] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Deconstruct required methods and state from the store
-  const { 
-    getUsers, 
-    users, 
-    selectedUser, 
-    setSelectedUser, 
-    messages, 
-    isUsersLoading, 
-    isMessagesLoading 
+  const {
+    getUsers,
+    users,
+    selectedUser,
+    setSelectedUser,
+    messages,
+    isUsersLoading,
+    isMessagesLoading,
+    addMessage // Assuming this exists in your store
   } = useChatStore();
-  
+
   const { authUser } = useAuthStore();
 
   const { socket, isConnected, isConnecting } = useSocket();
-  useEffect(()=>{
-    console.log("hehe", socket);
-  }, [socket])
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    console.log("Socket status:", socket);
+    if (socket && authUser?.id) {
+      const initMessage = {
+        type: MESSAGE_TYPES.INIT,
+        data: {
+          userId: authUser.id
+        }
+      };
+      socket.send(JSON.stringify(initMessage));
+
+      // Set up message listener
+      const handleMessage = (event: MessageEvent) => {
+        try {
+          const wsMessage = JSON.parse(event.data);
+          handleIncomingMessage(wsMessage);
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+
+      socket.addEventListener('message', handleMessage);
+
+      // Cleanup
+      return () => {
+        socket.removeEventListener('message', handleMessage);
+      };
+    }
+  }, [socket, authUser?.id]);
+
+  // Handle incoming WebSocket messages
+  const handleIncomingMessage = (wsMessage: any) => {
+    console.log('Received message:', wsMessage);
+    
+    switch (wsMessage.type) {
+      case MESSAGE_TYPES.MESSAGE:
+        // Add the new message to your store
+        if (addMessage) {
+          addMessage(wsMessage.data);
+        }
+        // Clear any errors
+        setError(null);
+        break;
+      
+      case MESSAGE_TYPES.SUCCESS:
+        console.log('Success:', wsMessage.data.message);
+        setError(null);
+        break;
+      
+      case MESSAGE_TYPES.ERROR:
+        console.error('Server error:', wsMessage.data.message);
+        setError(wsMessage.data.message);
+        break;
+      default:
+        console.log('Unknown message type:', wsMessage.type);
+    }
+  };
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   useEffect(() => {
     console.log("Calling getUsers...");
@@ -44,18 +109,64 @@ export default function HomePage() {
     console.log("isUsersLoading:", isUsersLoading);
   }, [users, isUsersLoading]);
 
+  useEffect(() => {
+    console.log("Selected user:", selectedUser);
+    console.log("isMessagesLoading:", isMessagesLoading);
+    console.log("Messages count:", messages.length);
+  }, [selectedUser, isMessagesLoading, messages]);
+
   const handleEmojiSelect = (emoji: { native?: string }) => {
     setMessage((prev) => prev + (emoji.native || ""));
+    // Focus back to input after emoji selection
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   const handleUserSelect = (user: ChatUser) => {
     setSelectedUser(user);
+    setError(null); // Clear any errors when selecting new user
   };
 
-  const onClickSend = ()=>{
+  // Send message function
+  const onClickSend = () => {
+    if (!socket || !isConnected) {
+      setError('Not connected to chat server');
+      return;
+    }
 
-  }
-  
+    if (!selectedUser) {
+      setError('Please select a user to chat with');
+      return;
+    }
+
+    if (!message.trim()) {
+      setError('Please enter a message');
+      return;
+    }
+
+    try {
+      const messagePayload = {
+        type: MESSAGE_TYPES.MESSAGE,
+        data: {
+          receiverId: selectedUser.id,
+          text: message.trim()
+        }
+      };
+
+      socket.send(JSON.stringify(messagePayload));
+      
+      // Clear the input and error
+      setMessage("");
+      setError(null);      
+      console.log('Message sent:', messagePayload);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setError('Failed to send message');
+    }
+  };
+
+
   // Show NoChatSelected skeleton until socket is connected
   if (!isConnected || isConnecting) {
     return (
@@ -71,7 +182,7 @@ export default function HomePage() {
               <div className="w-px h-full bg-base-300 mx-0" />
               <div className="flex-1 h-full flex flex-col rounded-r-2xl overflow-hidden">
                 <div className="h-full flex justify-center items-center">
-                  <NoChatSelected />
+                  <NoChatSelected isConnecting={isConnecting} />
                 </div>
               </div>
             </div>
@@ -105,13 +216,13 @@ export default function HomePage() {
                       </label>
                     </div>
                     <div className="flex-1 overflow-y-auto">
-                      <ChatUserList 
-                        users={users} 
+                      <ChatUserList
+                        users={users}
                         selectedUser={selectedUser}
                         onUserSelect={handleUserSelect}
                       />
                       {users.length === 0 && (
-                        <div className="text-center text-base-content/70">
+                        <div className="text-center text-base-content/70 p-4">
                           No users found
                         </div>
                       )}
@@ -124,6 +235,26 @@ export default function HomePage() {
             <div className="w-px h-full bg-base-300 mx-0" />
             {/* Chat Window */}
             <div className="flex-1 h-full flex flex-col rounded-r-2xl overflow-hidden">
+              {/* Connection Status */}
+              <div className={`h-1 ${
+                isConnected ? 'bg-green-500' : 'bg-red-500'
+              }`} />
+
+              {/* Error Display */}
+              {error && (
+                <div className="bg-error/10 border-l-4 border-error text-error px-4 py-2 mx-4 mt-2 rounded">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">{error}</span>
+                    <button 
+                      onClick={() => setError(null)}
+                      className="btn btn-ghost btn-xs text-error hover:bg-error/20"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Top NavBar of Chat Window */}
               {selectedUser && !isMessagesLoading && (
                 <div className="h-20 px-8 flex items-center gap-4 border-b border-base-300 bg-base-100/80 rounded-tr-2xl">
@@ -133,15 +264,19 @@ export default function HomePage() {
                       alt={selectedUser.name}
                       className="w-12 h-12 rounded-full object-cover border border-base-300"
                     />
+                    {/* Online status indicator could go here */}
                   </div>
                   <div>
                     <div className="font-semibold text-lg text-base-content">
                       {selectedUser.name}
                     </div>
+                    <div className="text-sm text-base-content/60">
+                      {isConnected ? 'Online' : 'Offline'}
+                    </div>
                   </div>
                 </div>
               )}
-              
+
               {/* Chat Messages or Skeleton or No Chat Selected */}
               <div className="flex-1 overflow-hidden">
                 {!selectedUser ? (
@@ -156,19 +291,31 @@ export default function HomePage() {
                     <div className="h-full">
                       <div className="relative z-10 p-3">
                         {messages.length > 0 ? (
-                          messages.map((msg, idx) => {
-                            const isLastInGroup =
-                              idx === messages.length - 1 || messages[idx + 1].senderId !== msg.senderId;
-                            return (
-                              <ChatBox
-                                key={msg.id}
-                                message={msg.text}
-                                time={new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                sent={msg.senderId === authUser?.id}
-                                showTime={isLastInGroup}
-                              />
-                            );
-                          })
+                          <>
+                            {messages
+                              .filter(msg => 
+                                (msg.senderId === authUser?.id && msg.receiverId === selectedUser.id) ||
+                                (msg.senderId === selectedUser.id && msg.receiverId === authUser?.id)
+                              )
+                              .map((msg, idx, filteredMessages) => {
+                                const isLastInGroup =
+                                  idx === filteredMessages.length - 1 || 
+                                  filteredMessages[idx + 1].senderId !== msg.senderId;
+                                return (
+                                  <ChatBox
+                                    key={msg.id}
+                                    message={msg.text || ''}
+                                    time={new Date(msg.createdAt).toLocaleTimeString([], { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit' 
+                                    })}
+                                    sent={msg.senderId === authUser?.id}
+                                    showTime={isLastInGroup}
+                                  />
+                                );
+                              })}
+                            <div ref={messagesEndRef} />
+                          </>
                         ) : (
                           <div className="text-center text-base-content/60 py-8">
                             No messages yet. Start the conversation!
@@ -182,7 +329,7 @@ export default function HomePage() {
 
               {/* Chat Input Box - Only show when a user is selected */}
               {selectedUser && (
-                <div className="px-4 py-3 bg-base-200 border-t border-base-300 flex items-center gap-2 sticky ">
+                <div className="px-4 py-3 bg-base-200 border-t border-base-300 flex items-center gap-2 sticky relative">
                   {/* Emoji Picker Button */}
                   <button
                     className="btn btn-ghost btn-circle"
@@ -192,12 +339,14 @@ export default function HomePage() {
                   >
                     <Smile className="w-6 h-6 text-base-content/70" />
                   </button>
+                  
                   {/* Emoji Picker Dropdown */}
                   {showEmoji && (
                     <div className="absolute bottom-16 left-0 z-50">
                       <Picker theme="dark" onEmojiSelect={handleEmojiSelect} />
                     </div>
                   )}
+                  
                   {/* Attach Button */}
                   <button
                     className="btn btn-ghost btn-circle"
@@ -206,17 +355,34 @@ export default function HomePage() {
                   >
                     <Paperclip className="w-6 h-6 text-base-content/70" />
                   </button>
+                  
                   {/* Message Input */}
                   <input
-                    ref={inputRef}
                     type="text"
                     className="input input-bordered flex-1 bg-base-50 focus:bg-base-50 border-none outline-none shadow-none rounded-lg"
-                    placeholder="Type a message"
+                    placeholder={isConnected ? "Type a message" : "Connecting..."}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}                    
+                  onChange={(e) => setMessage(e.target.value)}
+                  ref={inputRef}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      onClickSend();
+                    }
+                  }}
                   />
+                  
                   {/* Send Button */}
-                  <button className="btn btn-primary btn-circle" type="button" onClick={onClickSend}>
+                  <button 
+                    className={`btn btn-circle ${
+                      message.trim() && isConnected 
+                        ? 'btn-primary' 
+                        : 'btn-disabled'
+                    }`}
+                    type="button" 
+                    onClick={onClickSend}
+                    disabled={!message.trim() || !isConnected}
+                  >
                     <Send className="w-5 h-5" />
                   </button>
                 </div>

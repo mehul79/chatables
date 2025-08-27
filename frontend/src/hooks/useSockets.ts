@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-// import { useAuthStore } from "../store/useAuthStore";
-
+import { MESSAGE_TYPES, MessageType } from "../lib/types";
+import { useAuthStore } from "../store/useAuthStore";
 
 const WS_URL = 'ws://localhost:8080'
 
@@ -9,15 +9,17 @@ export function useSocket(){
     const [isConnected, setIsConnected] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
 
+    const {authUser} = useAuthStore();
+
     useEffect(() => {
         let newSocket: WebSocket| null;
         setIsConnecting(true);
         
         setTimeout(()=>{
             newSocket = new WebSocket(`${WS_URL}`);
-            
             newSocket.onopen = () => { 
                 console.log("connected");
+
                 setSocket(newSocket);
                 setIsConnected(true);
                 setIsConnecting(false);

@@ -4,7 +4,7 @@ interface NoChatSelectedProps {
   isConnecting?: boolean;
 }
 
-const NoChatSelected = ({ isConnecting = false }: NoChatSelectedProps) => {
+const NoChatSelected = ({ isConnecting }: NoChatSelectedProps) => {
   return (
     <div className="w-full flex flex-1 flex-col items-center justify-center relative">      
       {/* Content */}
