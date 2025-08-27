@@ -45,7 +45,9 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
             console.log("Error from FE useChatStore ", e);
             toast.error("Unable to load the users");
         } finally {
-            set({ isUsersLoading: false });
+            setTimeout(()=>{
+                set({ isUsersLoading: false });
+            }, 2000)
         }
     },
 

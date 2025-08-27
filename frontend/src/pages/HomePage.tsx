@@ -28,10 +28,10 @@ export default function HomePage() {
   
   const { authUser } = useAuthStore();
 
-  const socket = useSocket();
+  const { socket, isConnected, isConnecting } = useSocket();
   useEffect(()=>{
     console.log("hehe", socket);
-  }, [])
+  }, [socket])
 
   useEffect(() => {
     console.log("Calling getUsers...");
@@ -56,6 +56,30 @@ export default function HomePage() {
 
   }
   
+  // Show NoChatSelected skeleton until socket is connected
+  if (!isConnected || isConnecting) {
+    return (
+      <div className="h-screen overflow-hidden ">
+        <div className="flex items-center justify-center h-full w-full pt-17">
+          <div className="w-[89vw] h-[87vh] bg-base-100 rounded-2xl shadow-2xl border border-base-300 flex items-center justify-center">
+            <div className="flex h-full w-full">
+              <div className="w-1/4 h-full overflow-hidden">
+                <div className="flex flex-col h-full">
+                  <SidebarSkeleton />
+                </div>
+              </div>
+              <div className="w-px h-full bg-base-300 mx-0" />
+              <div className="flex-1 h-full flex flex-col rounded-r-2xl overflow-hidden">
+                <div className="h-full flex justify-center items-center">
+                  <NoChatSelected />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen overflow-hidden ">
@@ -128,8 +152,8 @@ export default function HomePage() {
                   <MessageSkeleton />
                 ) : (
                   <div className="overflow-x-hidden flex-1 overflow-y-auto bg-base-100 h-full relative">
-                      {/* Messages */}
-                      <div className="h-full">
+                    {/* Messages */}
+                    <div className="h-full">
                       <div className="relative z-10 p-3">
                         {messages.length > 0 ? (
                           messages.map((msg, idx) => {
