@@ -120,7 +120,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
           toast.success("Profile updated successfully");
         } catch (error) {
           console.log("error in update profile:", error);
-          toast.error(error.response.data.message);
+          if (axios.isAxiosError(error)) {
+            toast.error(error.response?.data?.message || "Failed to update profile");
+          } else {
+            toast.error("An unknown error occurred");
+          }
         } finally {
           set({ isUpdatingProfile: false });
         }
