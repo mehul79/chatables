@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/controller/auth.controller.ts","./src/db/db.ts","./src/router/auth.router.ts","./src/utils/generatetokenandcookie.ts"],"version":"5.8.2"}
+{"root":["./src/chatserver.ts","./src/index.ts","./src/types.ts","./src/controller/auth.controller.ts","./src/controller/message.controller.ts","./src/db/db.ts","./src/router/auth.router.ts","./src/router/message.router.ts","./src/utils/cloudinary.ts","./src/utils/generatetokenandcookie.ts","./src/utils/protectedroute.ts","./src/ws/chat.ts"],"version":"5.9.2"}
