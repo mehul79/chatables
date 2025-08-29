@@ -1,0 +1,25 @@
+# Node modules - don't copy host modules into image
+node_modules
+# TypeScript output / builds
+dist
+build
+# Local env & secrets - never bake secrets into images
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+.vscode
+.idea
+# Git files
+.git
+# Coverage / test artifacts
+coverage
+# Dockerfiles / compose not needed inside the image
+Dockerfile*
+docker-compose*.yml
+# Ignore local DBs / dev artifacts that shouldn't be in image
+*.sqlite
+*.db
+# Keep prisma schema & migrations; do NOT ignore prisma/
+# Keep package.json and package-lock.json — needed for install

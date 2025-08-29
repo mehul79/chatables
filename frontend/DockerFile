@@ -1,23 +1,16 @@
-## Multi-stage Dockerfile for Vite (React + TS) frontend
+# Use the latest LTS version of Node.js
+FROM node:18-alpine
 
-# 1) Build stage
-FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy deps for better caching
+# Install dependencies first (better caching)
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
-# Copy source
+# Copy all project files
 COPY . .
 
-# Build production bundle (use Vite directly to ensure dist is created)
-RUN npx vite build
-
-
-RUN npm install -g serve
-
-COPY --from=builder /app/dist ./dist
-
 EXPOSE 5173
-CMD ["serve", "-s", "dist", "-l", "5173"]
+
+# Run migrations, regenerate client, and then start dev server
+CMD npx prisma migrate dev && npx prisma generate && npm run dev
