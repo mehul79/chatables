@@ -1,8 +1,10 @@
-version: "2.4"
+version: "3.9"
 
 services:
   db:
-    image: postgres:15
+    image: postgres:16
+    container_name: chatables_db
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -11,78 +13,56 @@ services:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
-  # Build backend image once and reference it in both prisma and backend services
-  backend_image:
+  backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    # This service is only used to produce an image; it won't be started by itself.
-    # Give it no ports and don't run it as a runtime service.
-    labels:
-      - "purpose=backend-image"
-
-  prisma:
-    image: ${COMPOSE_PROJECT_NAME:-project}_backend_image
+    container_name: chatables_backend
     depends_on:
-      db:
-        condition: service_healthy
-    restart: "no"
-    env_file:
-      - ./backend/.env
-    # wait for DB and then run prisma generate & migrate (dev). No external script file.
+      - db
+    environment:
+      # Prisma & DB
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
+
+      # Backend-specific envs
+      PORT: 3000
+      JWT_AUTH_SECRET: JWT_AUTH_SECRET
+
+      # Cloudinary
+      CLOUDINARY_API_NAME: dtmrwsnag
+      CLOUDINARY_API_KEY: 463889935643194
+      CLOUDINARY_API_SECRET: yBY1LOGiTAQDV9UDDv3QYDkeId8
+      CLOUDINARY_URL: cloudinary://CLOUDINARY_API_KEY:CLOUDINARY_API_SECRET@dtmrwsnag
+
+      # Frontend URL (CORS etc.)
+      FRONTEND_URL: http://localhost:5173
     command: >
       sh -c "
         echo 'Waiting for Postgres...';
-        until pg_isready -h db -p 5432 -U postgres >/dev/null 2>&1; do
-          sleep 1;
-        done;
+        until pg_isready -h db -p 5432 -U postgres >/dev/null 2>&1; do sleep 1; done;
         echo 'Postgres ready — running prisma migrate dev';
-        npx prisma migrate dev;
+        npx prisma migrate dev --name init || true;
         echo 'Running prisma generate';
         npx prisma generate;
-        echo 'Prisma tasks finished.';
+        echo 'Starting backend server';
+        npm run dev;
       "
-
-  backend:
-    image: ${COMPOSE_PROJECT_NAME:-project}_backend_image
-    env_file:
-      - ./backend/.env
-    depends_on:
-      prisma:
-        condition: service_completed_successfully
     ports:
       - "3000:3000"
-    # Mount source for live dev, but protect node_modules (so image-installed modules remain)
-    volumes:
-      - ./backend:/app:delegated
-      - /app/node_modules
-    healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    command: ["npm", "run", "dev"]
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    env_file:
-      - ./frontend/.env
+    container_name: chatables_frontend
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
+    environment:
+      # Tell frontend how to talk to backend inside docker
+      VITE_API_URL: http://backend:3000/api
     ports:
       - "5173:5173"
-    volumes:
-      - ./frontend:/app:delegated
-    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 volumes:
   db_data:
