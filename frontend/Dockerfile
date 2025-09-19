@@ -12,5 +12,5 @@ COPY . .
 
 EXPOSE 5173
 
-# Run migrations, regenerate client, and then start dev server
-CMD npx prisma migrate dev && npx prisma generate && npm run dev
+# Start React dev server on 0.0.0.0 so Docker can expose it
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
