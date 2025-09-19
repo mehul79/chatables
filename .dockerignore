@@ -3,6 +3,8 @@ node_modules
 # TypeScript output / builds
 dist
 build
+.env
+.env.example
 # Local env & secrets - never bake secrets into images
 *.log
 npm-debug.log*
