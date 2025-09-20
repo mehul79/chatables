@@ -122,3 +122,8 @@ frontend/
     hooks/
 ```
 
+## Tasks Left
+
+- **Securing the WebSocket Server:**  
+  The WebSocket server currently does not have authentication or authorization checks implemented. Adding security measures (such as JWT validation or session checks) for WebSocket connections is recommended to prevent unauthorized access and ensure
+
